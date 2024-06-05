@@ -9,7 +9,7 @@ const app = express();
 const port = process.env.PORT;
 
 const mongoUri = `mongodb://${process.env.MONGO_HOST}:${process.env.MONGO_PORT}`;
-
+const redisUrl = `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`;
 
 const redisHost = process.env.REDIS_HOST;
 const redisPort = process.env.REDIS_PORT;
@@ -24,17 +24,18 @@ async function checkMongoConnection() {
   }
 }
 
-// async function checkRedisConnection() {
-//   try {
-//     const client = redis.createClient({ host: redisHost, port: redisPort });
-//     await client.connect();
-//     console.log("Connected to Redis successfully!");
-//     client.quit(); // Disconnect from Redis after successful check
-//   } catch (err) {
-//     console.error("Error connecting to Redis:", err);
-//     process.exit(1); // Exit the application on connection failure
-//   }
-// }
+async function checkRedisConnection() {
+  try {
+    // const client = redis.createClient({ host: redisHost, port: redisPort });
+    const client = redis.createClient({ url: redisUrl  });
+    await client.connect();
+    console.log("Connected to Redis successfully!");
+    client.quit(); // Disconnect from Redis after successful check
+  } catch (err) {
+    console.error("Error connecting to Redis:", err);
+    process.exit(1); // Exit the application on connection failure
+  }
+}
 
 app.use(
   expressWinston.logger({
@@ -55,7 +56,7 @@ app.get("/", (req, res) => {
 (async () => {
   await Promise.all([
     checkMongoConnection(),
-    // checkRedisConnection()
+    checkRedisConnection()
   ]);
 
   app.listen(port, () => {
