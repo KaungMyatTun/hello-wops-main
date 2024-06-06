@@ -19,6 +19,8 @@ COPY --from=build /app/src /app/src
 
 COPY --from=build /app/package.json /app
 
+COPY --from=build /app/logs /app/logs
+
 CMD [ "npm", "start" ]
 
 
